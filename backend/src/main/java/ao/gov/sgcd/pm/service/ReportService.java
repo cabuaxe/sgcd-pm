@@ -23,6 +23,7 @@ public class ReportService {
     private final TaskRepository taskRepository;
     private final ReportMapper reportMapper;
     private final ObjectMapper objectMapper;
+    private final PdfExportService pdfExportService;
 
     public List<ReportDTO> findAll() {
         return reportMapper.toDtoList(reportRepository.findAllByOrderByGeneratedAtDesc());
@@ -95,5 +96,11 @@ public class ReportService {
         SprintReport report = reportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Relatório não encontrado: " + id));
         return reportMapper.toDto(report);
+    }
+
+    public byte[] generatePdf(Long reportId) {
+        SprintReport report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Relatório não encontrado: " + reportId));
+        return pdfExportService.generatePdf(report);
     }
 }
