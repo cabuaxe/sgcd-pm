@@ -8,12 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,6 +108,93 @@ public class DashboardService {
                         .weekHoursPlanned(weekHoursPlanned)
                         .weekHoursSpent(weekHoursSpent)
                         .build())
+                .build();
+    }
+
+    public ProjectProgressDTO getProjectProgress() {
+        int totalSessions = 204;
+        int totalHoursPlanned = 680;
+        LocalDate startDate = LocalDate.parse("2026-03-02");
+        LocalDate targetDate = LocalDate.parse("2026-12-20");
+        LocalDate today = LocalDate.now();
+
+        int completedSessions = taskRepository.countByStatus(TaskStatus.COMPLETED);
+        BigDecimal totalHoursSpent = taskRepository.sumActualHoursCompleted();
+        double overallProgress = totalSessions > 0 ? (completedSessions * 100.0) / totalSessions : 0;
+        long daysRemaining = Math.max(0, ChronoUnit.DAYS.between(today, targetDate));
+
+        // Task status totals
+        int totalPlanned = taskRepository.countByStatus(TaskStatus.PLANNED);
+        int totalInProgress = taskRepository.countByStatus(TaskStatus.IN_PROGRESS);
+        int totalCompleted = completedSessions;
+        int totalBlocked = taskRepository.countByStatus(TaskStatus.BLOCKED);
+        int totalSkipped = taskRepository.countByStatus(TaskStatus.SKIPPED);
+
+        // Grouped counts per sprint (single query)
+        List<Object[]> grouped = taskRepository.countGroupedBySprintAndStatus();
+        Map<Long, Map<TaskStatus, Integer>> sprintStatusCounts = new HashMap<>();
+        for (Object[] row : grouped) {
+            Long sprintId = (Long) row[0];
+            TaskStatus status = (TaskStatus) row[1];
+            int count = ((Number) row[2]).intValue();
+            sprintStatusCounts.computeIfAbsent(sprintId, k -> new EnumMap<>(TaskStatus.class)).put(status, count);
+        }
+
+        // Sprint details
+        List<Sprint> sprints = sprintRepository.findAllOrdered();
+        List<ProjectProgressDTO.SprintProgressDTO> sprintDetails = sprints.stream()
+                .map(s -> {
+                    Map<TaskStatus, Integer> counts = sprintStatusCounts.getOrDefault(s.getId(), Collections.emptyMap());
+                    double progress = s.getTotalSessions() > 0
+                            ? (s.getCompletedSessions() * 100.0) / s.getTotalSessions() : 0;
+                    return ProjectProgressDTO.SprintProgressDTO.builder()
+                            .sprintNumber(s.getSprintNumber())
+                            .name(s.getName())
+                            .status(s.getStatus().name())
+                            .color(s.getColor())
+                            .startDate(s.getStartDate())
+                            .endDate(s.getEndDate())
+                            .totalSessions(s.getTotalSessions())
+                            .completedSessions(s.getCompletedSessions())
+                            .totalHours(s.getTotalHours())
+                            .actualHours(s.getActualHours())
+                            .progress(progress)
+                            .plannedTasks(counts.getOrDefault(TaskStatus.PLANNED, 0))
+                            .inProgressTasks(counts.getOrDefault(TaskStatus.IN_PROGRESS, 0))
+                            .completedTasks(counts.getOrDefault(TaskStatus.COMPLETED, 0))
+                            .blockedTasks(counts.getOrDefault(TaskStatus.BLOCKED, 0))
+                            .skippedTasks(counts.getOrDefault(TaskStatus.SKIPPED, 0))
+                            .build();
+                })
+                .toList();
+
+        // Velocity
+        long weeksElapsed = Math.max(1, ChronoUnit.WEEKS.between(startDate, today));
+        long totalWeeks = Math.max(1, ChronoUnit.WEEKS.between(startDate, targetDate));
+        long weeksRemaining = Math.max(0, totalWeeks - weeksElapsed);
+        double avgSessionsPerWeek = weeksElapsed > 0 ? (double) completedSessions / weeksElapsed : 0;
+        double avgHoursPerWeek = weeksElapsed > 0
+                ? totalHoursSpent.divide(BigDecimal.valueOf(weeksElapsed), 1, RoundingMode.HALF_UP).doubleValue() : 0;
+
+        return ProjectProgressDTO.builder()
+                .totalSessions(totalSessions)
+                .completedSessions(completedSessions)
+                .totalHoursPlanned(totalHoursPlanned)
+                .totalHoursSpent(totalHoursSpent)
+                .overallProgress(overallProgress)
+                .daysRemaining(daysRemaining)
+                .startDate(startDate)
+                .targetDate(targetDate)
+                .totalPlanned(totalPlanned)
+                .totalInProgress(totalInProgress)
+                .totalCompleted(totalCompleted)
+                .totalBlocked(totalBlocked)
+                .totalSkipped(totalSkipped)
+                .avgSessionsPerWeek(Math.round(avgSessionsPerWeek * 10) / 10.0)
+                .avgHoursPerWeek(Math.round(avgHoursPerWeek * 10) / 10.0)
+                .weeksElapsed(weeksElapsed)
+                .weeksRemaining(weeksRemaining)
+                .sprints(sprintDetails)
                 .build();
     }
 

@@ -16,6 +16,7 @@ export const routes: Routes = [
     loadComponent: () => import('./shared/components/layout.component').then(m => m.LayoutComponent),
     children: [
       { path: '', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'progress', loadComponent: () => import('./features/progress/progress.component').then(m => m.ProgressComponent) },
       { path: 'sprints', loadComponent: () => import('./features/sprints/sprint-list.component').then(m => m.SprintListComponent) },
       { path: 'sprints/:id', loadComponent: () => import('./features/sprints/sprint-detail.component').then(m => m.SprintDetailComponent) },
       { path: 'tasks', loadComponent: () => import('./features/tasks/task-list.component').then(m => m.TaskListComponent) },

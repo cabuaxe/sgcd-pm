@@ -84,6 +84,46 @@ export interface WeeklyActivity {
   tasksCompletedThisWeek: number;
 }
 
+export interface ProjectProgress {
+  totalSessions: number;
+  completedSessions: number;
+  totalHoursPlanned: number;
+  totalHoursSpent: number;
+  overallProgress: number;
+  daysRemaining: number;
+  startDate: string;
+  targetDate: string;
+  totalPlanned: number;
+  totalInProgress: number;
+  totalCompleted: number;
+  totalBlocked: number;
+  totalSkipped: number;
+  avgSessionsPerWeek: number;
+  avgHoursPerWeek: number;
+  weeksElapsed: number;
+  weeksRemaining: number;
+  sprints: SprintProgress[];
+}
+
+export interface SprintProgress {
+  sprintNumber: number;
+  name: string;
+  status: string;
+  color: string;
+  startDate: string;
+  endDate: string;
+  totalSessions: number;
+  completedSessions: number;
+  totalHours: number;
+  actualHours: number;
+  progress: number;
+  plannedTasks: number;
+  inProgressTasks: number;
+  completedTasks: number;
+  blockedTasks: number;
+  skippedTasks: number;
+}
+
 export interface CalendarData {
   year: number;
   month: number;

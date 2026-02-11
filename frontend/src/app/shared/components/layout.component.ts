@@ -27,6 +27,9 @@ import { AuthService } from '../../core/services/auth.service';
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
             <mat-icon>dashboard</mat-icon> Dashboard
           </a>
+          <a routerLink="/progress" routerLinkActive="active">
+            <mat-icon>trending_up</mat-icon> Progresso
+          </a>
           <a routerLink="/sprints" routerLinkActive="active">
             <mat-icon>flag</mat-icon> Sprints
           </a>

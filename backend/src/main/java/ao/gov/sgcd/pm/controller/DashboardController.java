@@ -1,6 +1,7 @@
 package ao.gov.sgcd.pm.controller;
 
 import ao.gov.sgcd.pm.dto.DashboardDTO;
+import ao.gov.sgcd.pm.dto.ProjectProgressDTO;
 import ao.gov.sgcd.pm.dto.StakeholderDashboardDTO;
 import ao.gov.sgcd.pm.service.DashboardService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,11 @@ public class DashboardController {
     @GetMapping
     public ResponseEntity<DashboardDTO> getDeveloperDashboard() {
         return ResponseEntity.ok(dashboardService.getDeveloperDashboard());
+    }
+
+    @GetMapping("/progress")
+    public ResponseEntity<ProjectProgressDTO> getProjectProgress() {
+        return ResponseEntity.ok(dashboardService.getProjectProgress());
     }
 
     @GetMapping("/stakeholder")

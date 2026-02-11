@@ -84,8 +84,7 @@ public class SprintService {
 
     private SprintDTO enrichDto(Sprint sprint) {
         SprintDTO dto = sprintMapper.toDto(sprint);
-        int taskCount = taskRepository.findBySprintIdOrderBySortOrderAsc(sprint.getId()).size();
-        dto.setTaskCount(taskCount);
+        dto.setTaskCount(taskRepository.countBySprintId(sprint.getId()));
         double progress = sprint.getTotalSessions() > 0
                 ? (sprint.getCompletedSessions() * 100.0) / sprint.getTotalSessions()
                 : 0;

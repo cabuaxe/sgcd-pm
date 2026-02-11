@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -60,4 +61,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("SELECT t FROM Task t WHERE t.sessionDate BETWEEN :weekStart AND :weekEnd ORDER BY t.sessionDate ASC")
     List<Task> findByWeek(@Param("weekStart") LocalDate weekStart, @Param("weekEnd") LocalDate weekEnd);
+
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.sprint.id = :sprintId")
+    Integer countBySprintId(@Param("sprintId") Long sprintId);
+
+    @Query("SELECT t.sprint.id, t.status, COUNT(t) FROM Task t GROUP BY t.sprint.id, t.status")
+    List<Object[]> countGroupedBySprintAndStatus();
+
+    @Query("SELECT COALESCE(SUM(t.plannedHours), 0) FROM Task t")
+    BigDecimal sumAllPlannedHours();
 }

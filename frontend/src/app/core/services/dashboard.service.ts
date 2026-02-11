@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
-import { Dashboard, StakeholderDashboard, CalendarData, BlockedDay } from '../models/dashboard.model';
+import { Dashboard, StakeholderDashboard, CalendarData, BlockedDay, ProjectProgress } from '../models/dashboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
@@ -13,6 +13,10 @@ export class DashboardService {
 
   getStakeholderDashboard(): Observable<StakeholderDashboard> {
     return this.api.get<StakeholderDashboard>('/dashboard/stakeholder');
+  }
+
+  getProjectProgress(): Observable<ProjectProgress> {
+    return this.api.get<ProjectProgress>('/dashboard/progress');
   }
 
   getCalendar(year?: number, month?: number): Observable<CalendarData> {
