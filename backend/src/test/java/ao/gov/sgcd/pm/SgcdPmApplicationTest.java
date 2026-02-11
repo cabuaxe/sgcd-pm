@@ -4,7 +4,7 @@ import ao.gov.sgcd.pm.seed.DataSeeder;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class SgcdPmApplicationTest {
 
-    @MockBean
+    @MockitoBean
     private DataSeeder dataSeeder; // Prevent CommandLineRunner from executing
 
     @Test
