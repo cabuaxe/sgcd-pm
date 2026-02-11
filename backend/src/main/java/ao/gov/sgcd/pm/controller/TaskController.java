@@ -1,6 +1,7 @@
 package ao.gov.sgcd.pm.controller;
 
 import ao.gov.sgcd.pm.dto.TaskDTO;
+import ao.gov.sgcd.pm.dto.TaskExecutionDTO;
 import ao.gov.sgcd.pm.dto.TaskNoteDTO;
 import ao.gov.sgcd.pm.dto.TaskUpdateDTO;
 import ao.gov.sgcd.pm.dto.PromptDTO;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -87,5 +89,16 @@ public class TaskController {
     @PostMapping("/{id}/notes")
     public ResponseEntity<TaskNoteDTO> addNote(@PathVariable Long id, @RequestBody TaskNoteDTO dto) {
         return ResponseEntity.ok(taskService.addNote(id, dto));
+    }
+
+    @GetMapping("/{id}/executions")
+    public ResponseEntity<List<TaskExecutionDTO>> getExecutions(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.getExecutions(id));
+    }
+
+    @PostMapping("/{id}/executions")
+    public ResponseEntity<TaskExecutionDTO> addExecution(@PathVariable Long id,
+                                                         @RequestBody TaskExecutionDTO dto) {
+        return ResponseEntity.ok(taskService.addExecution(id, dto));
     }
 }

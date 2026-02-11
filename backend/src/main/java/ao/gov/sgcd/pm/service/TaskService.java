@@ -2,6 +2,7 @@ package ao.gov.sgcd.pm.service;
 
 import ao.gov.sgcd.pm.dto.*;
 import ao.gov.sgcd.pm.entity.*;
+import ao.gov.sgcd.pm.mapper.TaskExecutionMapper;
 import ao.gov.sgcd.pm.mapper.TaskMapper;
 import ao.gov.sgcd.pm.mapper.TaskNoteMapper;
 import ao.gov.sgcd.pm.repository.*;
@@ -22,10 +23,12 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskExecutionRepository executionRepository;
     private final SprintRepository sprintRepository;
     private final SprintReportRepository reportRepository;
     private final TaskMapper taskMapper;
     private final TaskNoteMapper noteMapper;
+    private final TaskExecutionMapper executionMapper;
 
     public Page<TaskDTO> findFiltered(Long sprintId, TaskStatus status, LocalDate from, LocalDate to, Pageable pageable) {
         return taskRepository.findFiltered(sprintId, status, from, to, pageable)
@@ -173,5 +176,29 @@ public class TaskService {
                 .stream()
                 .map(taskMapper::toDto)
                 .toList();
+    }
+
+    public List<TaskExecutionDTO> getExecutions(Long taskId) {
+        taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + taskId));
+        return executionMapper.toDtoList(executionRepository.findByTaskIdOrderByStartedAtDesc(taskId));
+    }
+
+    @Transactional
+    public TaskExecutionDTO addExecution(Long taskId, TaskExecutionDTO dto) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + taskId));
+
+        TaskExecution execution = TaskExecution.builder()
+                .task(task)
+                .startedAt(dto.getStartedAt())
+                .endedAt(dto.getEndedAt())
+                .hoursSpent(dto.getHoursSpent())
+                .promptUsed(dto.getPromptUsed())
+                .responseSummary(dto.getResponseSummary())
+                .notes(dto.getNotes())
+                .build();
+
+        return executionMapper.toDto(executionRepository.save(execution));
     }
 }
