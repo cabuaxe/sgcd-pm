@@ -20,3 +20,6 @@ Thumbs.db
 
 # Zip archives (source specs already extracted)
 *.zip
+
+# Production secrets
+.env.prod

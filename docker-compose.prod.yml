@@ -1,0 +1,51 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sgcd-pm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: sgcd_pm
+      MYSQL_USER: sgcd_pm
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - sgcd-pm-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # No ports exposed — internal only
+
+  backend:
+    build: ./backend
+    container_name: sgcd-pm-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sgcd_pm?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Berlin
+      SPRING_DATASOURCE_USERNAME: sgcd_pm
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      STAKEHOLDER_PASSWORD_HASH: ${STAKEHOLDER_PASSWORD_HASH}
+      STAKEHOLDER_TOKEN: ${STAKEHOLDER_TOKEN}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    # No ports exposed — nginx proxies
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NGINX_CONF: nginx.prod.conf
+    container_name: sgcd-pm-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sgcd-pm-mysql-data:
