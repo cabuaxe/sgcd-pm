@@ -124,6 +124,8 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
           }
         </div>
       }
+    } @else if (error) {
+      <p style="color: red;">Erro: {{ error }}</p>
     } @else {
       <p>A carregar dashboard...</p>
     }
@@ -169,11 +171,15 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
 })
 export class DashboardComponent implements OnInit {
   dashboard: Dashboard | null = null;
+  error: string | null = null;
 
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-    this.dashboardService.getDeveloperDashboard().subscribe(d => this.dashboard = d);
+    this.dashboardService.getDeveloperDashboard().subscribe({
+      next: d => this.dashboard = d,
+      error: err => this.error = err.message || JSON.stringify(err)
+    });
   }
 
   get hoursPercent(): number {
