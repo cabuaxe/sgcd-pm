@@ -17,6 +17,15 @@ sgcd-pm:
     expiration: 86400000
   stakeholder:
     token: test-stakeholder-token
+  users:
+    - username: admin
+      password-hash: "$2a$10$vTag.mJEp7m7uALKaHm.gOV1S5yV2UTauO24oX9be80pMdPZPSSwq"
+      role: DEVELOPER
+    - username: stakeholder
+      password-hash: "$2a$10$DNyBaCxR1ki81d1ToHq85uW35oDeVxtBIUjIANEV7NsjGzCucX2fi"
+      role: STAKEHOLDER
+  cors:
+    allowed-origins: http://localhost:4201,http://localhost:4200
 
 server:
   port: 0

@@ -1,16 +1,22 @@
 package ao.gov.sgcd.pm.controller;
 
 import ao.gov.sgcd.pm.config.JwtTokenProvider;
+import ao.gov.sgcd.pm.config.UserProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
@@ -20,12 +26,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import(AuthControllerTest.TestConfig.class)
 @TestPropertySource(properties = {
         "sgcd-pm.stakeholder.token=test-stakeholder-token",
         "sgcd-pm.jwt.secret=test-secret-key-for-unit-testing-minimum-32-bytes",
         "sgcd-pm.jwt.expiration=86400000"
 })
 class AuthControllerTest {
+
+    static class TestConfig {
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public UserProperties userProperties() {
+            PasswordEncoder encoder = new BCryptPasswordEncoder();
+            UserProperties props = new UserProperties();
+            UserProperties.UserCredential admin = new UserProperties.UserCredential();
+            admin.setUsername("admin");
+            admin.setPasswordHash(encoder.encode("admin123"));
+            admin.setRole("DEVELOPER");
+            UserProperties.UserCredential stakeholder = new UserProperties.UserCredential();
+            stakeholder.setUsername("stakeholder");
+            stakeholder.setPasswordHash(encoder.encode("stakeholder2026"));
+            stakeholder.setRole("STAKEHOLDER");
+            props.setUsers(List.of(admin, stakeholder));
+            return props;
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;

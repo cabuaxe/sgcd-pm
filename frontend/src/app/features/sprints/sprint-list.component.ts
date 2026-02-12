@@ -50,6 +50,10 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     .sprint-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
     .sprint-stats { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
     .focus { font-size: 13px; color: var(--text-secondary); margin: 8px 0 12px; }
+
+    @media (max-width: 768px) {
+      .sprint-grid { grid-template-columns: 1fr; }
+    }
   `]
 })
 export class SprintListComponent implements OnInit {

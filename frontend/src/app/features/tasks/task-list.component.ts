@@ -91,6 +91,13 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     .title { flex: 1; }
     .sprint { font-size: 13px; color: var(--color-blue); font-weight: 600; }
     .date, .day, .hours { font-size: 13px; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .filters { flex-direction: column; }
+      mat-form-field { width: 100%; }
+      .sprint, .date, .day { display: none; }
+      .code { min-width: 45px; font-size: 12px; }
+    }
   `]
 })
 export class TaskListComponent implements OnInit {

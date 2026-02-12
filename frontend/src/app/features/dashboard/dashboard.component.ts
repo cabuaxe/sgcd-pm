@@ -125,7 +125,7 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
         </div>
       }
     } @else if (error) {
-      <p style="color: red;">Erro: {{ error }}</p>
+      <p class="error-text">Erro: {{ error }}</p>
     } @else {
       <p>A carregar dashboard...</p>
     }
@@ -167,6 +167,19 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     .blocked-list { display: flex; flex-direction: column; gap: 8px; }
     .blocked-item { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; }
     .blocked-item mat-icon { color: var(--angola-red); font-size: 18px; width: 18px; height: 18px; }
+    .error-text { color: var(--angola-red); font-size: 14px; text-align: center; padding: 40px; }
+
+    @media (max-width: 1024px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .sprint-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .kpi-row { grid-template-columns: 1fr; }
+      .sprint-grid { grid-template-columns: 1fr; }
+      .today-header { flex-wrap: wrap; }
+      .today-actions { flex-direction: column; }
+      .recent-item .task-date, .recent-item .task-hours { display: none; }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {

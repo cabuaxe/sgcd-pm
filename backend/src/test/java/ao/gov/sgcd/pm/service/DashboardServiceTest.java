@@ -6,7 +6,6 @@ import ao.gov.sgcd.pm.mapper.BlockedDayMapper;
 import ao.gov.sgcd.pm.mapper.SprintMapper;
 import ao.gov.sgcd.pm.mapper.TaskMapper;
 import ao.gov.sgcd.pm.repository.BlockedDayRepository;
-import ao.gov.sgcd.pm.repository.ProjectConfigRepository;
 import ao.gov.sgcd.pm.repository.SprintRepository;
 import ao.gov.sgcd.pm.repository.TaskRepository;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ class DashboardServiceTest {
     private BlockedDayRepository blockedDayRepository;
 
     @Mock
-    private ProjectConfigRepository configRepository;
+    private ProjectConfigService projectConfigService;
 
     @Mock
     private SprintMapper sprintMapper;
@@ -97,9 +96,17 @@ class DashboardServiceTest {
     // getDeveloperDashboard
     // =====================================================================
 
+    private void stubProjectConfig() {
+        when(projectConfigService.getTotalSessions()).thenReturn(204);
+        when(projectConfigService.getTotalHoursPlanned()).thenReturn(680);
+        lenient().when(projectConfigService.getStartDate()).thenReturn(LocalDate.parse("2026-03-02"));
+        lenient().when(projectConfigService.getTargetDate()).thenReturn(LocalDate.parse("2026-12-20"));
+    }
+
     @Test
     void getDeveloperDashboard_shouldAggregateAllMetrics() {
         // given
+        stubProjectConfig();
         int completedCount = 50;
         BigDecimal totalHoursSpent = BigDecimal.valueOf(170.0);
 
@@ -176,6 +183,7 @@ class DashboardServiceTest {
     @Test
     void getDeveloperDashboard_shouldHandleNoActiveSprint() {
         // given
+        stubProjectConfig();
         when(taskRepository.countByStatus(TaskStatus.COMPLETED)).thenReturn(0);
         when(taskRepository.sumActualHoursCompleted()).thenReturn(BigDecimal.ZERO);
         when(sprintRepository.findActiveSprint()).thenReturn(Optional.empty());
@@ -212,6 +220,7 @@ class DashboardServiceTest {
     @Test
     void getDeveloperDashboard_shouldFallBackToUpcomingTaskWhenNoTodayTask() {
         // given
+        stubProjectConfig();
         when(taskRepository.countByStatus(TaskStatus.COMPLETED)).thenReturn(10);
         when(taskRepository.sumActualHoursCompleted()).thenReturn(BigDecimal.valueOf(35.0));
         when(sprintRepository.findActiveSprint()).thenReturn(Optional.empty());
@@ -246,6 +255,7 @@ class DashboardServiceTest {
     @Test
     void getStakeholderDashboard_shouldReturnReadOnlyMetrics() {
         // given
+        stubProjectConfig();
         int completedCount = 80;
         BigDecimal totalHoursSpent = BigDecimal.valueOf(270.0);
 
@@ -311,6 +321,7 @@ class DashboardServiceTest {
     @Test
     void getStakeholderDashboard_shouldHandleEmptyData() {
         // given
+        stubProjectConfig();
         when(taskRepository.countByStatus(TaskStatus.COMPLETED)).thenReturn(0);
         when(taskRepository.sumActualHoursCompleted()).thenReturn(BigDecimal.ZERO);
         when(sprintRepository.findAllOrdered()).thenReturn(Collections.emptyList());
@@ -339,6 +350,7 @@ class DashboardServiceTest {
     @Test
     void getStakeholderDashboard_shouldCalculateSprintProgress() {
         // given
+        stubProjectConfig();
         when(taskRepository.countByStatus(TaskStatus.COMPLETED)).thenReturn(36);
         when(taskRepository.sumActualHoursCompleted()).thenReturn(BigDecimal.valueOf(108));
 

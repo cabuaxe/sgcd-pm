@@ -1,12 +1,10 @@
 package ao.gov.sgcd.pm.controller;
 
 import ao.gov.sgcd.pm.config.JwtTokenProvider;
-import ao.gov.sgcd.pm.dto.PromptDTO;
-import ao.gov.sgcd.pm.dto.TaskDTO;
-import ao.gov.sgcd.pm.dto.TaskNoteDTO;
-import ao.gov.sgcd.pm.dto.TaskUpdateDTO;
+import ao.gov.sgcd.pm.dto.*;
 import ao.gov.sgcd.pm.entity.NoteType;
 import ao.gov.sgcd.pm.entity.TaskStatus;
+import ao.gov.sgcd.pm.exception.ResourceNotFoundException;
 import ao.gov.sgcd.pm.service.PromptService;
 import ao.gov.sgcd.pm.service.TaskService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -134,11 +132,11 @@ class TaskControllerTest {
     }
 
     @Test
-    void findById_whenNotFound_shouldReturn500() throws Exception {
-        when(taskService.findById(999L)).thenThrow(new RuntimeException("Tarefa nao encontrada: 999"));
+    void findById_whenNotFound_shouldReturn404() throws Exception {
+        when(taskService.findById(999L)).thenThrow(new ResourceNotFoundException("Tarefa não encontrada: 999"));
 
         mockMvc.perform(get("/v1/tasks/999"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -259,7 +257,7 @@ class TaskControllerTest {
 
         mockMvc.perform(post("/v1/tasks/1/block")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("reason", "Waiting for DB access"))))
+                        .content(objectMapper.writeValueAsString(BlockReasonDTO.builder().reason("Waiting for DB access").build())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("BLOCKED")))
                 .andExpect(jsonPath("$.blockers", is("Waiting for DB access")));
@@ -324,5 +322,50 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.noteType", is("OBSERVATION")))
                 .andExpect(jsonPath("$.content", is("Important note about this task")))
                 .andExpect(jsonPath("$.author", is("admin")));
+    }
+
+    @Test
+    void block_withEmptyReason_shouldReturn400() throws Exception {
+        mockMvc.perform(post("/v1/tasks/1/block")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(BlockReasonDTO.builder().reason("").build())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void block_withNullReason_shouldReturn400() throws Exception {
+        mockMvc.perform(post("/v1/tasks/1/block")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addNote_withBlankContent_shouldReturn400() throws Exception {
+        TaskNoteDTO noteDto = TaskNoteDTO.builder()
+                .noteType(NoteType.OBSERVATION)
+                .content("")
+                .build();
+
+        mockMvc.perform(post("/v1/tasks/1/notes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(noteDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addNote_withNullNoteType_shouldReturn400() throws Exception {
+        mockMvc.perform(post("/v1/tasks/1/notes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\": \"test\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void start_whenNotFound_shouldReturn404() throws Exception {
+        when(taskService.startTask(999L)).thenThrow(new ResourceNotFoundException("Tarefa não encontrada: 999"));
+
+        mockMvc.perform(post("/v1/tasks/999/start"))
+                .andExpect(status().isNotFound());
     }
 }

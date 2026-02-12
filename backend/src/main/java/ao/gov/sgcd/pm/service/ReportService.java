@@ -2,10 +2,12 @@ package ao.gov.sgcd.pm.service;
 
 import ao.gov.sgcd.pm.dto.ReportDTO;
 import ao.gov.sgcd.pm.entity.*;
+import ao.gov.sgcd.pm.exception.ResourceNotFoundException;
 import ao.gov.sgcd.pm.mapper.ReportMapper;
 import ao.gov.sgcd.pm.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -32,7 +35,7 @@ public class ReportService {
     public ReportDTO findBySprintId(Long sprintId) {
         List<SprintReport> reports = reportRepository.findBySprintIdOrderByGeneratedAtDesc(sprintId);
         if (reports.isEmpty()) {
-            throw new RuntimeException("Relatório não encontrado para sprint: " + sprintId);
+            throw new ResourceNotFoundException("Relatório não encontrado para sprint: " + sprintId);
         }
         return reportMapper.toDto(reports.get(0));
     }
@@ -40,7 +43,7 @@ public class ReportService {
     @Transactional
     public ReportDTO generateReport(Long sprintId) {
         Sprint sprint = sprintRepository.findById(sprintId)
-                .orElseThrow(() -> new RuntimeException("Sprint não encontrado: " + sprintId));
+                .orElseThrow(() -> new ResourceNotFoundException("Sprint não encontrado: " + sprintId));
 
         int completed = taskRepository.countBySprintIdAndStatus(sprintId, TaskStatus.COMPLETED);
         int blocked = taskRepository.countBySprintIdAndStatus(sprintId, TaskStatus.BLOCKED);
@@ -80,6 +83,7 @@ public class ReportService {
                 sprint.getActualHours(), sprint.getTotalHours(),
                 blocked, skipped);
 
+        log.info("Gerando relatório para Sprint {} ({})", sprint.getSprintNumber(), sprintId);
         SprintReport report = SprintReport.builder()
                 .sprint(sprint)
                 .reportType(ReportType.SPRINT_END)
@@ -94,13 +98,13 @@ public class ReportService {
 
     public ReportDTO findById(Long id) {
         SprintReport report = reportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Relatório não encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Relatório não encontrado: " + id));
         return reportMapper.toDto(report);
     }
 
     public byte[] generatePdf(Long reportId) {
         SprintReport report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new RuntimeException("Relatório não encontrado: " + reportId));
+                .orElseThrow(() -> new ResourceNotFoundException("Relatório não encontrado: " + reportId));
         return pdfExportService.generatePdf(report);
     }
 }

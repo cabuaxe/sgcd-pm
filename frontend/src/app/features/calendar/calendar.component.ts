@@ -72,6 +72,15 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
     .block-reason { display: block; color: var(--angola-red); font-size: 10px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .task-link { display: flex; align-items: center; gap: 4px; margin-top: 4px; text-decoration: none; }
     .task-code { font-weight: 600; font-size: 11px; }
+
+    @media (max-width: 768px) {
+      .cal-cell { min-height: 50px; padding: 4px; font-size: 10px; }
+      .day-num { font-size: 11px; }
+      .block-reason { display: none; }
+      .task-code { font-size: 9px; }
+      .cal-day-header { font-size: 10px; padding: 4px; }
+      .cal-header h2 { font-size: 18px; min-width: 160px; }
+    }
   `]
 })
 export class CalendarComponent implements OnInit {

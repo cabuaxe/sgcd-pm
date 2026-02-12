@@ -201,4 +201,63 @@ describe('TaskDetailComponent', () => {
     component.addNote();
     expect(mockTaskService.addNote).not.toHaveBeenCalled();
   });
+
+  it('should show start and skip buttons for PLANNED task', () => {
+    fixture.detectChanges();
+    const html = fixture.nativeElement.innerHTML;
+    expect(html).toContain('Iniciar Tarefa');
+    expect(html).toContain('Ignorar');
+  });
+
+  it('should show complete button for IN_PROGRESS task', () => {
+    mockTaskService.findById.mockReturnValue(of(mockTaskStarted));
+    fixture.detectChanges();
+    const html = fixture.nativeElement.innerHTML;
+    expect(html).toContain('Concluir Tarefa');
+  });
+
+  it('should not show start button for COMPLETED task', () => {
+    mockTaskService.findById.mockReturnValue(of(mockTaskCompleted));
+    fixture.detectChanges();
+    const html = fixture.nativeElement.innerHTML;
+    expect(html).not.toContain('Iniciar Tarefa');
+    expect(html).not.toContain('Concluir Tarefa');
+  });
+
+  it('should disable buttons during loading', () => {
+    fixture.detectChanges();
+    component.loading = true;
+    fixture.detectChanges();
+    const buttons = fixture.nativeElement.querySelectorAll('.actions button');
+    buttons.forEach((btn: HTMLButtonElement) => {
+      expect(btn.disabled).toBe(true);
+    });
+  });
+
+  it('should set loading=true when starting task and reset on completion', () => {
+    fixture.detectChanges();
+    component.startTask();
+    expect(component.loading).toBe(false); // already resolved synchronously via of()
+    expect(component.task?.status).toBe('IN_PROGRESS');
+  });
+
+  it('should show snackbar on skip', () => {
+    fixture.detectChanges();
+    component.skipTask();
+    expect(mockSnackBar.open).toHaveBeenCalledWith('Tarefa ignorada', 'OK', { duration: 3000 });
+  });
+
+  it('should display task code and title', () => {
+    fixture.detectChanges();
+    const html = fixture.nativeElement.innerHTML;
+    expect(html).toContain('S1-05');
+    expect(html).toContain('Entidades JPA');
+  });
+
+  it('should display deliverables', () => {
+    fixture.detectChanges();
+    const html = fixture.nativeElement.innerHTML;
+    expect(html).toContain('Sprint.java');
+    expect(html).toContain('Task.java');
+  });
 });

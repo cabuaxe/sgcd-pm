@@ -3,7 +3,9 @@ package ao.gov.sgcd.pm.service;
 import ao.gov.sgcd.pm.dto.*;
 import ao.gov.sgcd.pm.entity.*;
 import ao.gov.sgcd.pm.mapper.*;
-import ao.gov.sgcd.pm.repository.*;
+import ao.gov.sgcd.pm.repository.BlockedDayRepository;
+import ao.gov.sgcd.pm.repository.SprintRepository;
+import ao.gov.sgcd.pm.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +26,13 @@ public class DashboardService {
     private final SprintRepository sprintRepository;
     private final TaskRepository taskRepository;
     private final BlockedDayRepository blockedDayRepository;
-    private final ProjectConfigRepository configRepository;
+    private final ProjectConfigService projectConfigService;
     private final SprintMapper sprintMapper;
     private final TaskMapper taskMapper;
     private final BlockedDayMapper blockedDayMapper;
 
     public DashboardDTO getDeveloperDashboard() {
-        int totalSessions = 204;
+        int totalSessions = projectConfigService.getTotalSessions();
         int completedSessions = taskRepository.countByStatus(TaskStatus.COMPLETED);
         BigDecimal totalHoursSpent = taskRepository.sumActualHoursCompleted();
         double projectProgress = totalSessions > 0 ? (completedSessions * 100.0) / totalSessions : 0;
@@ -95,7 +97,7 @@ public class DashboardService {
                 .projectProgress(projectProgress)
                 .totalSessions(totalSessions)
                 .completedSessions(completedSessions)
-                .totalHoursPlanned(680)
+                .totalHoursPlanned(projectConfigService.getTotalHoursPlanned())
                 .totalHoursSpent(totalHoursSpent)
                 .activeSprint(activeSprint)
                 .todayTask(todayTask)
@@ -112,10 +114,10 @@ public class DashboardService {
     }
 
     public ProjectProgressDTO getProjectProgress() {
-        int totalSessions = 204;
-        int totalHoursPlanned = 680;
-        LocalDate startDate = LocalDate.parse("2026-03-02");
-        LocalDate targetDate = LocalDate.parse("2026-12-20");
+        int totalSessions = projectConfigService.getTotalSessions();
+        int totalHoursPlanned = projectConfigService.getTotalHoursPlanned();
+        LocalDate startDate = projectConfigService.getStartDate();
+        LocalDate targetDate = projectConfigService.getTargetDate();
         LocalDate today = LocalDate.now();
 
         int completedSessions = taskRepository.countByStatus(TaskStatus.COMPLETED);
@@ -199,13 +201,13 @@ public class DashboardService {
     }
 
     public StakeholderDashboardDTO getStakeholderDashboard() {
-        int totalSessions = 204;
+        int totalSessions = projectConfigService.getTotalSessions();
         int completedSessions = taskRepository.countByStatus(TaskStatus.COMPLETED);
         BigDecimal totalHoursSpent = taskRepository.sumActualHoursCompleted();
         double overallProgress = totalSessions > 0 ? (completedSessions * 100.0) / totalSessions : 0;
 
-        LocalDate startDate = LocalDate.parse("2026-03-02");
-        LocalDate targetDate = LocalDate.parse("2026-12-20");
+        LocalDate startDate = projectConfigService.getStartDate();
+        LocalDate targetDate = projectConfigService.getTargetDate();
         long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), targetDate);
 
         // Sprint details
@@ -265,7 +267,7 @@ public class DashboardService {
                 .overallProgress(overallProgress)
                 .totalSessions(totalSessions)
                 .completedSessions(completedSessions)
-                .totalHoursPlanned(680)
+                .totalHoursPlanned(projectConfigService.getTotalHoursPlanned())
                 .totalHoursSpent(totalHoursSpent)
                 .startDate(startDate)
                 .targetDate(targetDate)

@@ -1,6 +1,57 @@
 @use '@angular/material' as mat;
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap');
 
+// Angola red palette for Material
+$angola-red-palette: (
+  50: #fce4e8,
+  100: #f7bcc5,
+  200: #f1909f,
+  300: #eb6379,
+  400: #e7425c,
+  500: #CC092F,
+  600: #b8082a,
+  700: #a00624,
+  800: #88051e,
+  900: #600313,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+$angola-gold-palette: (
+  50: #fef6e0,
+  100: #fce8b3,
+  200: #fada80,
+  300: #f8cb4d,
+  400: #f6c026,
+  500: #F4B400,
+  600: #f0a800,
+  700: #eb9900,
+  800: #e68b00,
+  900: #dd7200,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: rgba(black, 0.87),
+    800: white,
+    900: white,
+  )
+);
+
 // Angola visual identity
 :root {
   --angola-red: #CC092F;
@@ -23,10 +74,10 @@ html {
   height: 100%;
   @include mat.theme((
     color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
+      primary: $angola-red-palette,
+      tertiary: $angola-gold-palette,
     ),
-    typography: Roboto,
+    typography: Source Sans 3,
     density: 0,
   ));
 }
@@ -74,6 +125,12 @@ h1, h2, h3 {
   border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 16px;
+}
+
+// Error text
+.error-text {
+  color: var(--angola-red);
+  font-size: 14px;
 }
 
 // Scrollbar

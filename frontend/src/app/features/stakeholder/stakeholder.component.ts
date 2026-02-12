@@ -154,6 +154,19 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     .ms-in_progress mat-icon { color: var(--color-blue); }
     .ms-future mat-icon { color: var(--text-muted); }
     .loading { text-align: center; padding: 80px; color: var(--text-muted); }
+
+    @media (max-width: 1024px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .sprint-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .stakeholder-page { padding: 20px 12px; }
+      .sh-header h1 { font-size: 22px; }
+      .kpi-row { grid-template-columns: 1fr; }
+      .sprint-grid { grid-template-columns: 1fr; }
+      .weekly-row { grid-template-columns: 1fr; }
+      .timeline { display: none; }
+    }
   `]
 })
 export class StakeholderComponent implements OnInit {

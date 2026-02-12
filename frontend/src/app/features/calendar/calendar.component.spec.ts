@@ -132,4 +132,31 @@ describe('CalendarComponent', () => {
     expect(component.monthNames[0]).toBe('Janeiro');
     expect(component.monthNames[11]).toBe('Dezembro');
   });
+
+  it('should render day headers in the grid', () => {
+    fixture.detectChanges();
+    const headers = fixture.nativeElement.querySelectorAll('.cal-day-header');
+    expect(headers.length).toBe(7);
+    expect(headers[0].textContent.trim()).toBe('Seg');
+  });
+
+  it('should render calendar cells after loading', () => {
+    fixture.detectChanges();
+    const cells = fixture.nativeElement.querySelectorAll('.cal-cell:not(.empty)');
+    expect(cells.length).toBe(mockCalendar.days.length);
+  });
+
+  it('should render task link for days with tasks', () => {
+    fixture.detectChanges();
+    const taskLinks = fixture.nativeElement.querySelectorAll('.task-link');
+    expect(taskLinks.length).toBe(1);
+    expect(taskLinks[0].textContent).toContain('S1-01');
+  });
+
+  it('should display month and year in header', () => {
+    fixture.detectChanges();
+    const header = fixture.nativeElement.querySelector('.cal-header h2');
+    expect(header.textContent).toContain(component.monthNames[component.month - 1]);
+    expect(header.textContent).toContain(String(component.year));
+  });
 });

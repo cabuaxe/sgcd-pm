@@ -101,4 +101,40 @@ describe('LoginComponent', () => {
     expect(component.error).toBe('Credenciais inválidas');
     expect(component.loading).toBe(false);
   });
+
+  it('should display error message in DOM when error is set', () => {
+    component.error = 'Credenciais inválidas';
+    fixture.detectChanges();
+    const errorEl = fixture.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
+    expect(errorEl.textContent).toContain('Credenciais inválidas');
+  });
+
+  it('should not display error message when error is empty', () => {
+    component.error = '';
+    fixture.detectChanges();
+    const errorEl = fixture.nativeElement.querySelector('.error');
+    expect(errorEl).toBeFalsy();
+  });
+
+  it('should disable login button when loading', () => {
+    component.loading = true;
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button[mat-raised-button]');
+    expect(button.disabled).toBe(true);
+    expect(button.textContent).toContain('A entrar...');
+  });
+
+  it('should show Entrar text when not loading', () => {
+    component.loading = false;
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button[mat-raised-button]');
+    expect(button.textContent).toContain('Entrar');
+  });
+
+  it('should display SGCD-PM header', () => {
+    fixture.detectChanges();
+    const header = fixture.nativeElement.querySelector('.login-header h1');
+    expect(header.textContent).toContain('SGCD-PM');
+  });
 });

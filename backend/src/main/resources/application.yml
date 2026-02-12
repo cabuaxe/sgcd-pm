@@ -27,6 +27,15 @@ sgcd-pm:
     expiration: 86400000
   stakeholder:
     token: ${STAKEHOLDER_TOKEN:sgcd-stakeholder-2026}
+  users:
+    - username: admin
+      password-hash: "${ADMIN_PASSWORD_HASH:$2a$10$vTag.mJEp7m7uALKaHm.gOV1S5yV2UTauO24oX9be80pMdPZPSSwq}"
+      role: DEVELOPER
+    - username: stakeholder
+      password-hash: "${STAKEHOLDER_PASSWORD_HASH:$2a$10$DNyBaCxR1ki81d1ToHq85uW35oDeVxtBIUjIANEV7NsjGzCucX2fi}"
+      role: STAKEHOLDER
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4201,http://localhost:4200}
 
 springdoc:
   api-docs:

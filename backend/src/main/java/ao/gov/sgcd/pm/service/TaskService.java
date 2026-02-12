@@ -2,11 +2,13 @@ package ao.gov.sgcd.pm.service;
 
 import ao.gov.sgcd.pm.dto.*;
 import ao.gov.sgcd.pm.entity.*;
+import ao.gov.sgcd.pm.exception.ResourceNotFoundException;
 import ao.gov.sgcd.pm.mapper.TaskExecutionMapper;
 import ao.gov.sgcd.pm.mapper.TaskMapper;
 import ao.gov.sgcd.pm.mapper.TaskNoteMapper;
 import ao.gov.sgcd.pm.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -37,7 +40,7 @@ public class TaskService {
 
     public TaskDTO findById(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + id));
         return taskMapper.toDto(task);
     }
 
@@ -61,7 +64,7 @@ public class TaskService {
     @Transactional
     public TaskDTO update(Long id, TaskUpdateDTO dto) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + id));
 
         if (dto.getCompletionNotes() != null) task.setCompletionNotes(dto.getCompletionNotes());
         if (dto.getBlockers() != null) task.setBlockers(dto.getBlockers());
@@ -74,7 +77,8 @@ public class TaskService {
     @Transactional
     public TaskDTO startTask(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + id));
+        log.info("Iniciando tarefa {} ({})", task.getTaskCode(), id);
         task.setStatus(TaskStatus.IN_PROGRESS);
         task.setStartedAt(LocalDateTime.now());
 
@@ -91,9 +95,10 @@ public class TaskService {
     @Transactional
     public TaskDTO completeTask(Long id, TaskUpdateDTO dto) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + id));
 
         // 1. Mark task as COMPLETED
+        log.info("Concluindo tarefa {} ({})", task.getTaskCode(), id);
         task.setStatus(TaskStatus.COMPLETED);
         task.setCompletedAt(LocalDateTime.now());
 
@@ -139,7 +144,8 @@ public class TaskService {
     @Transactional
     public TaskDTO blockTask(Long id, String reason) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + id));
+        log.info("Bloqueando tarefa {} ({}): {}", task.getTaskCode(), id, reason);
         task.setStatus(TaskStatus.BLOCKED);
         task.setBlockers(reason);
         return taskMapper.toDto(taskRepository.save(task));
@@ -148,7 +154,7 @@ public class TaskService {
     @Transactional
     public TaskDTO skipTask(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + id));
         task.setStatus(TaskStatus.SKIPPED);
         return taskMapper.toDto(taskRepository.save(task));
     }
@@ -156,7 +162,7 @@ public class TaskService {
     @Transactional
     public TaskNoteDTO addNote(Long taskId, TaskNoteDTO dto) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + taskId));
 
         TaskNote note = TaskNote.builder()
                 .task(task)
@@ -180,14 +186,14 @@ public class TaskService {
 
     public List<TaskExecutionDTO> getExecutions(Long taskId) {
         taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + taskId));
         return executionMapper.toDtoList(executionRepository.findByTaskIdOrderByStartedAtDesc(taskId));
     }
 
     @Transactional
     public TaskExecutionDTO addExecution(Long taskId, TaskExecutionDTO dto) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + taskId));
 
         TaskExecution execution = TaskExecution.builder()
                 .task(task)

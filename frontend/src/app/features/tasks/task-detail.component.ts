@@ -70,24 +70,24 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
       <!-- Actions -->
       <div class="actions">
         @if (task.status === 'PLANNED') {
-          <button mat-raised-button class="btn-primary" (click)="startTask()">
-            <mat-icon>play_arrow</mat-icon> Iniciar Tarefa
+          <button mat-raised-button class="btn-primary" (click)="startTask()" [disabled]="loading">
+            <mat-icon>play_arrow</mat-icon> {{ loading ? 'A processar...' : 'Iniciar Tarefa' }}
           </button>
-          <button mat-stroked-button (click)="skipTask()">
+          <button mat-stroked-button (click)="skipTask()" [disabled]="loading">
             <mat-icon>skip_next</mat-icon> Ignorar
           </button>
         }
         @if (task.status === 'IN_PROGRESS') {
-          <button mat-raised-button color="primary" (click)="completeTask()">
-            <mat-icon>check</mat-icon> Concluir Tarefa
+          <button mat-raised-button color="primary" (click)="completeTask()" [disabled]="loading">
+            <mat-icon>check</mat-icon> {{ loading ? 'A processar...' : 'Concluir Tarefa' }}
           </button>
         }
         @if (task.status === 'PLANNED' || task.status === 'IN_PROGRESS') {
-          <button mat-stroked-button color="warn" (click)="blockTask()">
+          <button mat-stroked-button color="warn" (click)="blockTask()" [disabled]="loading">
             <mat-icon>block</mat-icon> Bloquear
           </button>
         }
-        <button mat-stroked-button (click)="loadPrompt()">
+        <button mat-stroked-button (click)="loadPrompt()" [disabled]="loading">
           <mat-icon>smart_toy</mat-icon> Ver Prompt
         </button>
       </div>
@@ -202,6 +202,13 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     .note-type-field { width: 140px; }
     .note-content-field { flex: 1; }
     .full-width { width: 100%; }
+
+    @media (max-width: 768px) {
+      .actions { flex-wrap: wrap; }
+      .meta { gap: 8px; }
+      .note-input-row { flex-direction: column; }
+      .note-type-field { width: 100%; }
+    }
   `]
 })
 export class TaskDetailComponent implements OnInit {
@@ -211,6 +218,7 @@ export class TaskDetailComponent implements OnInit {
   newNote = '';
   noteType: string = 'INFO';
   completionNotes = '';
+  loading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -237,21 +245,31 @@ export class TaskDetailComponent implements OnInit {
 
   startTask(): void {
     if (!this.task) return;
-    this.taskService.start(this.task.id).subscribe(t => {
-      this.task = t;
-      this.snackBar.open('Tarefa iniciada!', 'OK', { duration: 3000 });
+    this.loading = true;
+    this.taskService.start(this.task.id).subscribe({
+      next: t => {
+        this.task = t;
+        this.snackBar.open('Tarefa iniciada!', 'OK', { duration: 3000 });
+        this.loading = false;
+      },
+      error: () => this.loading = false
     });
   }
 
   completeTask(): void {
     if (!this.task) return;
+    this.loading = true;
     const data = this.completionNotes.trim()
       ? { completionNotes: this.completionNotes }
       : undefined;
-    this.taskService.complete(this.task.id, data).subscribe(t => {
-      this.task = t;
-      this.completionNotes = '';
-      this.snackBar.open('Tarefa concluída!', 'OK', { duration: 3000 });
+    this.taskService.complete(this.task.id, data).subscribe({
+      next: t => {
+        this.task = t;
+        this.completionNotes = '';
+        this.snackBar.open('Tarefa concluída!', 'OK', { duration: 3000 });
+        this.loading = false;
+      },
+      error: () => this.loading = false
     });
   }
 
@@ -260,18 +278,28 @@ export class TaskDetailComponent implements OnInit {
     const dialogRef = this.dialog.open(BlockDialogComponent);
     dialogRef.afterClosed().subscribe(reason => {
       if (!reason || !this.task) return;
-      this.taskService.block(this.task.id, reason).subscribe(t => {
-        this.task = t;
-        this.snackBar.open('Tarefa bloqueada', 'OK', { duration: 3000 });
+      this.loading = true;
+      this.taskService.block(this.task.id, reason).subscribe({
+        next: t => {
+          this.task = t;
+          this.snackBar.open('Tarefa bloqueada', 'OK', { duration: 3000 });
+          this.loading = false;
+        },
+        error: () => this.loading = false
       });
     });
   }
 
   skipTask(): void {
     if (!this.task) return;
-    this.taskService.skip(this.task.id).subscribe(t => {
-      this.task = t;
-      this.snackBar.open('Tarefa ignorada', 'OK', { duration: 3000 });
+    this.loading = true;
+    this.taskService.skip(this.task.id).subscribe({
+      next: t => {
+        this.task = t;
+        this.snackBar.open('Tarefa ignorada', 'OK', { duration: 3000 });
+        this.loading = false;
+      },
+      error: () => this.loading = false
     });
   }
 

@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../core/services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-layout',
@@ -14,6 +16,11 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="layout">
       <mat-toolbar class="header">
+        @if (isMobile) {
+          <button mat-icon-button (click)="sidenav.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
         <span class="logo">SGCD-PM</span>
         <span class="spacer"></span>
         <span class="user-info">{{ auth.getRole() }}</span>
@@ -22,39 +29,44 @@ import { AuthService } from '../../core/services/auth.service';
         </button>
       </mat-toolbar>
 
-      <div class="content-area">
-        <nav class="sidebar">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <mat-sidenav-container class="content-area">
+        <mat-sidenav #sidenav
+          [mode]="isMobile ? 'over' : 'side'"
+          [opened]="!isMobile"
+          [fixedInViewport]="isMobile"
+          fixedTopGap="64"
+          class="sidebar">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="onNavClick()">
             <mat-icon>dashboard</mat-icon> Dashboard
           </a>
-          <a routerLink="/progress" routerLinkActive="active">
+          <a routerLink="/progress" routerLinkActive="active" (click)="onNavClick()">
             <mat-icon>trending_up</mat-icon> Progresso
           </a>
-          <a routerLink="/sprints" routerLinkActive="active">
+          <a routerLink="/sprints" routerLinkActive="active" (click)="onNavClick()">
             <mat-icon>flag</mat-icon> Sprints
           </a>
-          <a routerLink="/tasks" routerLinkActive="active">
+          <a routerLink="/tasks" routerLinkActive="active" (click)="onNavClick()">
             <mat-icon>task_alt</mat-icon> Tarefas
           </a>
-          <a routerLink="/prompts" routerLinkActive="active">
+          <a routerLink="/prompts" routerLinkActive="active" (click)="onNavClick()">
             <mat-icon>smart_toy</mat-icon> Prompts
           </a>
-          <a routerLink="/calendar" routerLinkActive="active">
+          <a routerLink="/calendar" routerLinkActive="active" (click)="onNavClick()">
             <mat-icon>calendar_month</mat-icon> Calendário
           </a>
-          <a routerLink="/reports" routerLinkActive="active">
+          <a routerLink="/reports" routerLinkActive="active" (click)="onNavClick()">
             <mat-icon>assessment</mat-icon> Relatórios
           </a>
           <div class="divider"></div>
-          <a routerLink="/stakeholder" target="_blank">
+          <a routerLink="/stakeholder" target="_blank" (click)="onNavClick()">
             <mat-icon>visibility</mat-icon> Stakeholder
           </a>
-        </nav>
+        </mat-sidenav>
 
-        <main class="main-content">
+        <mat-sidenav-content class="main-content">
           <router-outlet />
-        </main>
-      </div>
+        </mat-sidenav-content>
+      </mat-sidenav-container>
     </div>
   `,
   styles: [`
@@ -74,7 +86,7 @@ import { AuthService } from '../../core/services/auth.service';
     }
     .spacer { flex: 1; }
     .user-info { margin-right: 8px; font-size: 14px; opacity: 0.8; }
-    .content-area { display: flex; flex: 1; overflow: hidden; }
+    .content-area { flex: 1; }
     .sidebar {
       width: 220px;
       background: var(--surface);
@@ -99,9 +111,36 @@ import { AuthService } from '../../core/services/auth.service';
     .sidebar a.active { background: var(--angola-red); color: white; }
     .sidebar a.active mat-icon { color: white; }
     .divider { height: 1px; background: var(--border-light); margin: 8px 16px; }
-    .main-content { flex: 1; overflow-y: auto; padding: 24px; }
+    .main-content { padding: 24px; }
+
+    @media (max-width: 768px) {
+      .user-info { display: none; }
+      .main-content { padding: 16px; }
+    }
   `]
 })
-export class LayoutComponent {
-  constructor(public auth: AuthService) {}
+export class LayoutComponent implements OnInit, OnDestroy {
+  @ViewChild('sidenav') sidenav!: MatSidenav;
+  isMobile = false;
+  private bpSub!: Subscription;
+
+  constructor(
+    public auth: AuthService,
+    private breakpointObserver: BreakpointObserver
+  ) {}
+
+  ngOnInit(): void {
+    this.bpSub = this.breakpointObserver.observe(['(max-width: 768px)'])
+      .subscribe(result => this.isMobile = result.matches);
+  }
+
+  ngOnDestroy(): void {
+    this.bpSub?.unsubscribe();
+  }
+
+  onNavClick(): void {
+    if (this.isMobile) {
+      this.sidenav.close();
+    }
+  }
 }

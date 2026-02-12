@@ -68,6 +68,12 @@ interface Report {
     .report-date { font-size: 13px; color: var(--text-muted); }
     .summary { margin: 8px 0 4px; }
     .summary-en { color: var(--text-secondary); font-size: 14px; margin: 0; }
+
+    @media (max-width: 768px) {
+      .sprint-buttons { flex-direction: column; }
+      .sprint-buttons button { width: 100%; }
+      .report-header { flex-wrap: wrap; gap: 8px; }
+    }
   `]
 })
 export class ReportsComponent implements OnInit {

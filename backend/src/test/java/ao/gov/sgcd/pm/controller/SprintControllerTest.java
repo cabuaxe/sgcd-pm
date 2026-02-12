@@ -4,6 +4,7 @@ import ao.gov.sgcd.pm.config.JwtTokenProvider;
 import ao.gov.sgcd.pm.dto.SprintDTO;
 import ao.gov.sgcd.pm.dto.SprintProgressDTO;
 import ao.gov.sgcd.pm.entity.SprintStatus;
+import ao.gov.sgcd.pm.exception.ResourceNotFoundException;
 import ao.gov.sgcd.pm.service.SprintService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -117,11 +118,11 @@ class SprintControllerTest {
     }
 
     @Test
-    void findById_whenNotFound_shouldReturn500() throws Exception {
-        when(sprintService.findById(999L)).thenThrow(new RuntimeException("Sprint nao encontrado: 999"));
+    void findById_whenNotFound_shouldReturn404() throws Exception {
+        when(sprintService.findById(999L)).thenThrow(new ResourceNotFoundException("Sprint não encontrado: 999"));
 
         mockMvc.perform(get("/v1/sprints/999"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -170,11 +171,11 @@ class SprintControllerTest {
     }
 
     @Test
-    void findActive_whenNoActive_shouldReturn500() throws Exception {
-        when(sprintService.findActive()).thenThrow(new RuntimeException("Nenhum sprint activo ou planeado"));
+    void findActive_whenNoActive_shouldReturn404() throws Exception {
+        when(sprintService.findActive()).thenThrow(new ResourceNotFoundException("Nenhum sprint activo ou planeado"));
 
         mockMvc.perform(get("/v1/sprints/active"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -213,5 +214,28 @@ class SprintControllerTest {
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("COMPLETED")));
+    }
+
+    @Test
+    void getProgress_whenNotFound_shouldReturn404() throws Exception {
+        when(sprintService.getProgress(999L)).thenThrow(new ResourceNotFoundException("Sprint não encontrado: 999"));
+
+        mockMvc.perform(get("/v1/sprints/999/progress"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void update_whenNotFound_shouldReturn404() throws Exception {
+        SprintDTO updateDto = SprintDTO.builder()
+                .status(SprintStatus.ACTIVE)
+                .build();
+
+        when(sprintService.update(eq(999L), any(SprintDTO.class)))
+                .thenThrow(new ResourceNotFoundException("Sprint não encontrado: 999"));
+
+        mockMvc.perform(patch("/v1/sprints/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isNotFound());
     }
 }

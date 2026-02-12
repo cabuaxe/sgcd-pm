@@ -4,6 +4,7 @@ import ao.gov.sgcd.pm.dto.PromptDTO;
 import ao.gov.sgcd.pm.entity.Sprint;
 import ao.gov.sgcd.pm.entity.Task;
 import ao.gov.sgcd.pm.entity.TaskStatus;
+import ao.gov.sgcd.pm.exception.ResourceNotFoundException;
 import ao.gov.sgcd.pm.repository.TaskRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +50,7 @@ public class PromptService {
 
     public PromptDTO getPromptForTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada: " + taskId));
         return buildPrompt(task);
     }
 

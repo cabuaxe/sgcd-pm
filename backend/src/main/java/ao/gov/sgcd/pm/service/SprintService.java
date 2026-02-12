@@ -5,15 +5,18 @@ import ao.gov.sgcd.pm.dto.SprintProgressDTO;
 import ao.gov.sgcd.pm.entity.Sprint;
 import ao.gov.sgcd.pm.entity.SprintStatus;
 import ao.gov.sgcd.pm.entity.TaskStatus;
+import ao.gov.sgcd.pm.exception.ResourceNotFoundException;
 import ao.gov.sgcd.pm.mapper.SprintMapper;
 import ao.gov.sgcd.pm.repository.SprintRepository;
 import ao.gov.sgcd.pm.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SprintService {
@@ -30,20 +33,20 @@ public class SprintService {
 
     public SprintDTO findById(Long id) {
         Sprint sprint = sprintRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sprint não encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Sprint não encontrado: " + id));
         return enrichDto(sprint);
     }
 
     public SprintDTO findActive() {
         Sprint sprint = sprintRepository.findActiveSprint()
                 .orElseGet(() -> sprintRepository.findFirstByStatusOrderBySprintNumberAsc(SprintStatus.PLANNED)
-                        .orElseThrow(() -> new RuntimeException("Nenhum sprint activo ou planeado")));
+                        .orElseThrow(() -> new ResourceNotFoundException("Nenhum sprint activo ou planeado")));
         return enrichDto(sprint);
     }
 
     public SprintProgressDTO getProgress(Long id) {
         Sprint sprint = sprintRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sprint não encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Sprint não encontrado: " + id));
 
         int planned = taskRepository.countBySprintIdAndStatus(id, TaskStatus.PLANNED);
         int inProgress = taskRepository.countBySprintIdAndStatus(id, TaskStatus.IN_PROGRESS);
@@ -74,7 +77,7 @@ public class SprintService {
     @Transactional
     public SprintDTO update(Long id, SprintDTO dto) {
         Sprint sprint = sprintRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sprint não encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Sprint não encontrado: " + id));
 
         if (dto.getStatus() != null) sprint.setStatus(dto.getStatus());
         if (dto.getCompletionNotes() != null) sprint.setCompletionNotes(dto.getCompletionNotes());
