@@ -29,6 +29,7 @@ services:
       STAKEHOLDER_PASSWORD_HASH: ${STAKEHOLDER_PASSWORD_HASH}
       STAKEHOLDER_TOKEN: ${STAKEHOLDER_TOKEN}
       CORS_ORIGINS: ${CORS_ORIGINS}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
     depends_on:
       mysql:
         condition: service_healthy
@@ -42,7 +43,7 @@ services:
         NGINX_CONF: nginx.prod.conf
     container_name: sgcd-pm-frontend
     ports:
-      - "80:80"
+      - "3000:80"
     depends_on:
       - backend
     restart: unless-stopped

@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v1/dashboard/stakeholder").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v1/stakeholder/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v1/webhooks/**").permitAll()
                 .requestMatchers(HttpMethod.PATCH, "/v1/**").hasRole("DEVELOPER")
                 .requestMatchers(HttpMethod.POST, "/v1/**").hasRole("DEVELOPER")
                 .requestMatchers(HttpMethod.DELETE, "/v1/**").hasRole("DEVELOPER")

@@ -35,6 +35,8 @@ sgcd-pm:
     - username: stakeholder
       password-hash: "${STAKEHOLDER_PASSWORD_HASH:$2a$10$DNyBaCxR1ki81d1ToHq85uW35oDeVxtBIUjIANEV7NsjGzCucX2fi}"
       role: STAKEHOLDER
+  webhook:
+    secret: ${GITHUB_WEBHOOK_SECRET:}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:4201,http://localhost:4200}
 
