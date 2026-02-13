@@ -122,12 +122,11 @@ describe('StakeholderComponent', () => {
     // Let's test with a fresh component where service returns nothing:
   });
 
-  it('should show loading text before data is loaded', () => {
+  it('should show skeleton loader before data is loaded', () => {
     mockDashboardService.getStakeholderDashboard.mockReturnValue(of(null as any));
     fixture.detectChanges();
-    // With null data, the loading div should show
-    const loading = fixture.nativeElement.querySelector('.loading');
-    expect(loading).toBeTruthy();
-    expect(loading.textContent).toContain('A carregar');
+    // With null data, the skeleton loader should show
+    const skeleton = fixture.nativeElement.querySelector('.skeleton-stakeholder');
+    expect(skeleton).toBeTruthy();
   });
 });

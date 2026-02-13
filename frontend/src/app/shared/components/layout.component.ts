@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -24,6 +25,9 @@ import { Subscription } from 'rxjs';
         <span class="logo">SGCD-PM</span>
         <span class="spacer"></span>
         <span class="user-info">{{ auth.getRole() }}</span>
+        <button mat-icon-button (click)="theme.toggle()" aria-label="Toggle dark mode">
+          <mat-icon>{{ theme.isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
         <button mat-icon-button (click)="auth.logout()">
           <mat-icon>logout</mat-icon>
         </button>
@@ -141,6 +145,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   constructor(
     public auth: AuthService,
+    public theme: ThemeService,
     private breakpointObserver: BreakpointObserver,
     private cdr: ChangeDetectorRef
   ) {}

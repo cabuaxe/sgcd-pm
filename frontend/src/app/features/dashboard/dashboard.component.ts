@@ -9,6 +9,8 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { Dashboard } from '../../core/models/dashboard.model';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ProgressBarComponent } from '../../shared/components/progress-bar.component';
+import { AnimatedCounterComponent } from '../../shared/components/animated-counter.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader.component';
 import { DatePtPipe } from '../../shared/pipes/date-pt.pipe';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 
@@ -16,7 +18,7 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatChipsModule,
-    StatusBadgeComponent, ProgressBarComponent, DatePtPipe, HoursPipe],
+    StatusBadgeComponent, ProgressBarComponent, AnimatedCounterComponent, SkeletonLoaderComponent, DatePtPipe, HoursPipe],
   template: `
     @if (dashboard) {
       <h2>Dashboard</h2>
@@ -30,17 +32,23 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
         </mat-card>
         <mat-card class="kpi-card">
           <div class="kpi-label">Progresso Global</div>
-          <div class="kpi-value">{{ dashboard.completedSessions }}/{{ dashboard.totalSessions }}</div>
+          <div class="kpi-value">
+            <app-animated-counter [targetValue]="dashboard.completedSessions" />/{{ dashboard.totalSessions }}
+          </div>
           <app-progress-bar [value]="dashboard.projectProgress" color="var(--angola-red)" />
         </mat-card>
         <mat-card class="kpi-card">
           <div class="kpi-label">Horas</div>
-          <div class="kpi-value">{{ dashboard.totalHoursSpent | hours }} / {{ dashboard.totalHoursPlanned | hours }}</div>
+          <div class="kpi-value">
+            <app-animated-counter [targetValue]="dashboard.totalHoursSpent" [decimals]="1" suffix="h" /> / {{ dashboard.totalHoursPlanned | hours }}
+          </div>
           <app-progress-bar [value]="hoursPercent" color="var(--angola-gold)" />
         </mat-card>
         <mat-card class="kpi-card">
           <div class="kpi-label">Esta Semana</div>
-          <div class="kpi-value">{{ dashboard.weekProgress.weekCompleted }}/{{ dashboard.weekProgress.weekTasks }}</div>
+          <div class="kpi-value">
+            <app-animated-counter [targetValue]="dashboard.weekProgress.weekCompleted" />/{{ dashboard.weekProgress.weekTasks }}
+          </div>
           <app-progress-bar [value]="weekPercent" color="var(--color-blue)" />
         </mat-card>
       </div>
@@ -88,7 +96,7 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
       <h3>Progresso dos Sprints</h3>
       <div class="sprint-grid">
         @for (s of dashboard.sprintSummaries; track s.sprintNumber) {
-          <mat-card class="sprint-mini" [style.border-left-color]="s.color">
+          <mat-card class="sprint-mini card-hover" [style.border-left-color]="s.color">
             <div class="sprint-mini-header">S{{ s.sprintNumber }}</div>
             <div class="sprint-mini-name">{{ s.name }}</div>
             <app-progress-bar [value]="s.progress" [color]="s.color" />
@@ -127,7 +135,17 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     } @else if (error) {
       <p class="error-text">Erro: {{ error }}</p>
     } @else {
-      <p>A carregar dashboard...</p>
+      <div class="skeleton-dashboard">
+        <app-skeleton-loader variant="text" width="200px" height="28px" />
+        <div class="kpi-row">
+          <app-skeleton-loader variant="kpi" [count]="4" />
+        </div>
+        <app-skeleton-loader variant="card" height="160px" />
+        <app-skeleton-loader variant="text" width="180px" height="24px" />
+        <div class="sprint-grid">
+          <app-skeleton-loader variant="card" height="80px" [count]="6" />
+        </div>
+      </div>
     }
   `,
   styles: [`
@@ -168,6 +186,9 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     .blocked-item { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; }
     .blocked-item mat-icon { color: var(--angola-red); font-size: 18px; width: 18px; height: 18px; }
     .error-text { color: var(--angola-red); font-size: 14px; text-align: center; padding: 40px; }
+    .skeleton-dashboard { padding-top: 8px; }
+    .skeleton-dashboard .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0 24px; }
+    .skeleton-dashboard .sprint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
 
     @media (max-width: 1024px) {
       .kpi-row { grid-template-columns: repeat(2, 1fr); }

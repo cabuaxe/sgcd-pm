@@ -89,6 +89,39 @@ body {
   font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text-primary);
   background-color: var(--surface-alt);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+// Dark mode
+body.dark-mode {
+  color-scheme: dark;
+  --surface: #0D1117;
+  --surface-alt: #161B22;
+  --border: #30363D;
+  --border-light: #21262D;
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #484F58;
+  --angola-red: #E5253E;
+  --color-blue: #58A6FF;
+  --color-green: #3FB950;
+  --color-purple: #BC8CFF;
+  --color-teal: #2DD4BF;
+
+  .mat-mdc-card {
+    background: var(--surface) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+  }
+  .mat-toolbar {
+    background: #010409 !important;
+  }
+  .status-planned { color: var(--text-muted); }
+  .status-active, .status-in-progress { color: var(--color-blue); }
+  .status-completed { color: var(--color-green); }
+
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
 }
 
 h1, h2, h3 {
@@ -131,6 +164,16 @@ h1, h2, h3 {
 .error-text {
   color: var(--angola-red);
   font-size: 14px;
+}
+
+// Card hover utility
+.card-hover {
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 // Scrollbar

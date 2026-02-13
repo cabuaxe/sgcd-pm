@@ -18,7 +18,7 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
     <h2>Sprints</h2>
     <div class="sprint-grid">
       @for (sprint of sprints; track sprint.id) {
-        <mat-card class="sprint-card" [style.border-left-color]="sprint.color">
+        <mat-card class="sprint-card card-hover" [style.border-left-color]="sprint.color">
           <div class="sprint-header">
             <span class="sprint-num">Sprint {{ sprint.sprintNumber }}</span>
             <app-status-badge [status]="sprint.status" />
